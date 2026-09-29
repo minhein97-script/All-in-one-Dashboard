@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Hub</title>
+  <style>
+    /* Light Mode: Pastel Sage & Mint Ice (No Pink) */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #e6f4f1 0%, #e0f2fe 50%, #f0f3ff 100%);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(94, 234, 212, 0.35);
+      --card-shadow: 0 10px 30px rgba(13, 148, 136, 0.06);
+      --text-color: #132e2b;
+      --subtext-color: #0d9488;
+      --accent-color: #7c3aed;
+      --accent-hover: #6d28d9;
+      --accent-soft: rgba(124, 58, 237, 0.12);
+      --input-bg: rgba(255, 255, 255, 0.95);
+      --border-color: #99f6e4;
+      --glass-blur: blur(14px);
+    }
+
+    /* Dark Mode: Deep Midnight Navy & Cyan/Indigo Accent */
+    [data-theme="dark"] {
+      --bg-gradient: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
+      --card-bg: rgba(27, 38, 59, 0.85);
+      --card-border: rgba(72, 149, 239, 0.25);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --text-color: #e0e1dd;
+      --subtext-color: #4cc9f0;
+      --accent-color: #4895ef;
+      --accent-hover: #3f37c9;
+      --accent-soft: rgba(72, 149, 239, 0.15);
+      --input-bg: rgba(13, 27, 42, 0.65);
+      --border-color: #2a3a5e;
+      --glass-blur: blur(16px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-color);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1300px;
+      margin: 0 auto 30px auto;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .theme-toggle {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      color: var(--text-color);
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .search-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-color);
+    }
+
+    button.action-btn {
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button.action-btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric-box {
+      background: var(--input-bg);
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--subtext-color);
+      font-weight: 600;
+    }
+
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Hero Result display */
+    .hero-display {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-color);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .hero-display .metric-value {
+      font-size: 1.4rem;
+      color: var(--accent-color);
+      margin-top: 6px;
+      word-break: break-word;
+    }
+
+    /* Clock styling */
+    .clock-display {
+      background: var(--accent-soft);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      margin-top: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .clock-display .time {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--accent-color);
+    }
+
+    /* News & Nav Styling */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-tabs button {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--subtext-color);
+      padding: 8px 16px;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .nav-tabs button.active {
+      background: var(--accent-color);
+      color: #fff;
+      border-color: var(--accent-color);
+    }
+
+    /* Calculator Grid UI */
+    .calc-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .calc-btn-grid button {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .calc-btn-grid button:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent-color);
+    }
+
+    /* News styling */
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .news-item {
+      padding: 14px;
+      background: var(--input-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .news-item a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .news-item a:hover {
+      color: var(--accent-color);
+    }
+
+    .news-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--subtext-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Dashboard Hub</h1>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+  </header>
+
+  <div class="dashboard-grid">
+
+    <!-- WEATHER & AIR QUALITY -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Weather & Air Quality</h2>
+        <span id="weatherLocation" style="font-size: 0.85rem; font-weight: 600; color: var(--subtext-color);">Chiang Mai</span>
+      </div>
+      
+      <div class="search-group">
+        <input type="text" id="cityInput" placeholder="Enter city name..." value="Chiang Mai" />
+        <button class="action-btn" onclick="getWeather()">Search</button>
+      </div>
+
+      <div class="grid-2col">
+        <div class="metric-box">
+          <div class="metric-label">Temperature</div>
+          <div class="metric-value" id="temp">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Feels Like</div>
+          <div class="metric-value" id="feelsLike">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Humidity</div>
+          <div class="metric-value" id="humidity">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Wind</div>
+          <div class="metric-value" id="wind">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">UV Index</div>
+          <div class="metric-value" id="uv">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Air Quality</div>
+          <div class="metric-value" id="aqi">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Sunrise</div>
+          <div class="metric-value" id="sunrise">--</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Sunset</div>
+          <div class="metric-value" id="sunset">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CURRENCY CONVERTER -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Currency Converter</h2>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label class="metric-label" style="display: block; margin-bottom: 6px;">Amount</label>
+        <input type="number" id="curAmount" value="1" min="0.01" step="any" oninput="convertCurrency()" />
+      </div>
+
+      <div class="grid-2col">
+        <div>
+          <label class="metric-label" style="display: block; margin-bottom: 6px;">From</label>
+          <select id="curFrom" onchange="convertCurrency()"></select>
+        </div>
+        <div>
+          <label class="metric-label" style="display: block; margin-bottom: 6px;">To</label>
+          <select id="curTo" onchange="convertCurrency()"></select>
+        </div>
+      </div>
+
+      <div class="hero-display">
+        <div class="metric-label">Converted Amount</div>
+        <div class="metric-value" id="curResult">Calculating...</div>
+      </div>
+    </div>
+
+    <!-- WORLD CLOCK -->
+    <div class="card">
+      <div class="card-header">
+        <h2>World Clock</h2>
+      </div>
+
+      <input type="text" id="clockSearch" placeholder="Filter timezone or city..." oninput="filterTimezones()" style="margin-bottom: 12px;" />
+      <select id="timezoneSelect" onchange="updateClock()"></select>
+
+      <div class="clock-display">
+        <div class="metric-label" id="clockCity">Selected Timezone</div>
+        <div class="time" id="clockTime">--:--:--</div>
+        <div class="metric-label" id="clockDate" style="margin-top: 6px; text-transform: none; font-weight: 500;">--</div>
+      </div>
+    </div>
+
+    <!-- UNIVERSAL CALCULATOR -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Universal Calculator</h2>
+      </div>
+
+      <div class="nav-tabs" id="calcCategoryNav">
+        <button class="active" onclick="switchCalcCat('math', this)">Math</button>
+        <button onclick="switchCalcCat('finance', this)">Finance</button>
+        <button onclick="switchCalcCat('converters', this)">Converters</button>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <select id="calcSubTool" onchange="renderCalcUI()"></select>
+      </div>
+
+      <div id="calcDynamicForm"></div>
+
+      <div class="hero-display">
+        <div class="metric-label">Result</div>
+        <div class="metric-value" id="calcResult">0</div>
+      </div>
+    </div>
+
+    <!-- NEWS DASHBOARD -->
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="card-header">
+        <h2>Live News Feed</h2>
+      </div>
+
+      <div class="nav-tabs" id="newsNav">
+        <button class="active" onclick="fetchNews('world', this)">World</button>
+        <button onclick="fetchNews('technology', this)">Technology</button>
+        <button onclick="fetchNews('science', this)">Science</button>
+        <button onclick="fetchNews('business', this)">Business</button>
+        <button onclick="fetchNews('sports', this)">Sports</button>
+        <button onclick="fetchNews('entertainment', this)">Entertainment</button>
+      </div>
+
+      <div class="news-list" id="newsList">
+        <div>Loading real-time news...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- THEME SWITCHER ---
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeBtn');
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        btn.textContent = '🌙 Dark Mode';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        btn.textContent = '☀️ Light Mode';
+      }
+    }
+
+    // --- WEATHER & AQI ---
+    async function getWeather() {
+      const city = document.getElementById('cityInput').value || 'Chiang Mai';
+      try {
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+        const geoData = await geoRes.json();
+        
+        if (!geoData.results || geoData.results.length === 0) {
+          alert('City not found');
+          return;
+        }
+
+        const { latitude, longitude, name, country } = geoData.results[0];
+        document.getElementById('weatherLocation').textContent = `${name}, ${country}`;
+
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,uv_index&daily=sunrise,sunset&timezone=auto`);
+        const wData = await weatherRes.json();
+
+        const aqiRes = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=european_aqi`);
+        const aqiData = await aqiRes.json();
+
+        document.getElementById('temp').textContent = `${wData.current.temperature_2m} °C`;
+        document.getElementById('feelsLike').textContent = `${wData.current.apparent_temperature} °C`;
+        document.getElementById('humidity').textContent = `${wData.current.relative_humidity_2m}%`;
+        document.getElementById('wind').textContent = `${wData.current.wind_speed_10m} km/h`;
+        document.getElementById('uv').textContent = wData.current.uv_index;
+        
+        const sunriseTime = wData.daily.sunrise[0].split('T')[1];
+        const sunsetTime = wData.daily.sunset[0].split('T')[1];
+        document.getElementById('sunrise').textContent = sunriseTime;
+        document.getElementById('sunset').textContent = sunsetTime;
+
+        document.getElementById('aqi').textContent = aqiData.current ? `${aqiData.current.european_aqi} AQI` : 'N/A';
+
+      } catch (err) {
+        console.error("Weather error:", err);
+      }
+    }
+
+    // --- CURRENCY CONVERTER ---
+    let currencyRatesCache = null;
+
+    async function initCurrency() {
+      const currencies = [
+        "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", 
+        "HKD", "NZD", "SEK", "KRW", "SGD", "NOK", "MXN", "INR", 
+        "RUB", "ZAR", "BRL", "THB", "MYR", "IDR", "PHP", "VND"
+      ];
+
+      const fromSelect = document.getElementById('curFrom');
+      const toSelect = document.getElementById('curTo');
+
+      currencies.forEach(code => {
+        fromSelect.add(new Option(code, code));
+        toSelect.add(new Option(code, code));
+      });
+
+      fromSelect.value = 'USD';
+      toSelect.value = 'EUR';
+
+      fetchExchangeRates();
+    }
+
+    async function fetchExchangeRates() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data && data.rates) {
+          currencyRatesCache = data.rates;
+          convertCurrency();
+        } else {
+          throw new Error("Invalid exchange rate data");
+        }
+      } catch (err) {
+        document.getElementById('curResult').textContent = 'Rate unavailable';
+        console.error("Currency fetch error:", err);
+      }
+    }
+
+    function convertCurrency() {
+      const amount = parseFloat(document.getElementById('curAmount').value);
+      const from = document.getElementById('curFrom').value;
+      const to = document.getElementById('curTo').value;
+      const resultDiv = document.getElementById('curResult');
+
+      if (isNaN(amount) || amount <= 0) {
+        resultDiv.textContent = '--';
+        return;
+      }
+
+      if (!currencyRatesCache) {
+        resultDiv.textContent = 'Loading rates...';
+        return;
+      }
+
+      const rateFrom = currencyRatesCache[from];
+      const rateTo = currencyRatesCache[to];
+
+      if (rateFrom && rateTo) {
+        const converted = (amount / rateFrom) * rateTo;
+        resultDiv.textContent = `${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${to}`;
+      } else {
+        resultDiv.textContent = 'Conversion error';
+      }
+    }
+
+    // --- WORLD CLOCK ---
+    let allTimezones = [];
+    let clockInterval = null;
+
+    function initClock() {
+      allTimezones = Intl.supportedValuesOf('timeZone');
+      populateTimezones(allTimezones);
+      
+      const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const select = document.getElementById('timezoneSelect');
+      select.value = userTz;
+      
+      updateClock();
+    }
+
+    function populateTimezones(list) {
+      const select = document.getElementById('timezoneSelect');
+      select.innerHTML = '';
+      list.forEach(tz => {
+        const opt = new Option(tz, tz);
+        select.add(opt);
+      });
+    }
+
+    function filterTimezones() {
+      const query = document.getElementById('clockSearch').value.toLowerCase();
+      const filtered = allTimezones.filter(tz => tz.toLowerCase().includes(query));
+      populateTimezones(filtered);
+      if (filtered.length > 0) {
+        updateClock();
+      }
+    }
+
+    function updateClock() {
+      if (clockInterval) clearInterval(clockInterval);
+
+      const render = () => {
+        const tz = document.getElementById('timezoneSelect').value;
+        if (!tz) return;
+
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { timeZone: tz, hour12: false });
+        const dateString = now.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        document.getElementById('clockCity').textContent = tz.replace(/_/g, ' ');
+        document.getElementById('clockTime').textContent = timeString;
+        document.getElementById('clockDate').textContent = dateString;
+      };
+
+      render();
+      clockInterval = setInterval(render, 1000);
+    }
+
+    // --- UNIVERSAL CALCULATOR ENGINE ---
+    const calcConfig = {
+      math: [
+        { id: 'basic', name: 'Basic Calculator' },
+        { id: 'scientific', name: 'Scientific Calculator' },
+        { id: 'percentage', name: 'Percentage' },
+        { id: 'fractions', name: 'Fractions' }
+      ],
+      finance: [
+        { id: 'loan', name: 'Loan Calculator' },
+        { id: 'mortgage', name: 'Mortgage' },
+        { id: 'compound', name: 'Compound Interest' },
+        { id: 'investment', name: 'Investment Return' },
+        { id: 'tip', name: 'Tip Calculator' }
+      ],
+      converters: [
+        { id: 'length', name: 'Length' },
+        { id: 'weight', name: 'Weight' },
+        { id: 'temperature', name: 'Temperature' },
+        { id: 'area', name: 'Area' },
+        { id: 'volume', name: 'Volume' },
+        { id: 'speed', name: 'Speed' },
+        { id: 'data', name: 'Data Storage' },
+        { id: 'energy', name: 'Energy' },
+        { id: 'pressure', name: 'Pressure' }
+      ]
+    };
+
+    let currentCalcCat = 'math';
+    let mathExpr = '';
+
+    function initCalculator() {
+      switchCalcCat('math');
+    }
+
+    function switchCalcCat(cat, btn) {
+      currentCalcCat = cat;
+      if (btn) {
+        document.querySelectorAll('#calcCategoryNav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      const subSelect = document.getElementById('calcSubTool');
+      subSelect.innerHTML = '';
+      calcConfig[cat].forEach(item => {
+        subSelect.add(new Option(item.name, item.id));
+      });
+
+      renderCalcUI();
+    }
+
+    function setCalcResult(val) {
+      document.getElementById('calcResult').textContent = val;
+    }
+
+    function renderCalcUI() {
+      const tool = document.getElementById('calcSubTool').value;
+      const form = document.getElementById('calcDynamicForm');
+      form.innerHTML = '';
+      setCalcResult(0);
+      mathExpr = '';
+
+      if (tool === 'basic' || tool === 'scientific') {
+        renderMathGrid(tool);
+      } else if (tool === 'percentage') {
+        form.innerHTML = `
+          <div style="margin-bottom: 10px;">
+            <label class="metric-label">What is</label>
+            <input type="number" id="percP" placeholder="%" oninput="calcPercentage()">
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label class="metric-label">% of</label>
+            <input type="number" id="percV" placeholder="Value" oninput="calcPercentage()">
+          </div>
+        `;
+      } else if (tool === 'fractions') {
+        form.innerHTML = `
+          <div class="grid-2col" style="margin-bottom: 10px;">
+            <input type="number" id="f1n" placeholder="Num 1" oninput="calcFractions()">
+            <input type="number" id="f1d" placeholder="Den 1" oninput="calcFractions()">
+          </div>
+          <select id="fOp" style="margin-bottom: 10px;" onchange="calcFractions()">
+            <option value="+">+</option><option value="-">-</option><option value="*">×</option><option value="/">÷</option>
+          </select>
+          <div class="grid-2col">
+            <input type="number" id="f2n" placeholder="Num 2" oninput="calcFractions()">
+            <input type="number" id="f2d" placeholder="Den 2" oninput="calcFractions()">
+          </div>
+        `;
+      } else if (['loan', 'mortgage'].includes(tool)) {
+        form.innerHTML = `
+          <div style="margin-bottom: 8px;"><label class="metric-label">Principal Amount</label><input type="number" id="loanP" value="100000" oninput="calcLoan()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Annual Interest Rate (%)</label><input type="number" id="loanR" value="5" step="0.1" oninput="calcLoan()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Term (Years)</label><input type="number" id="loanY" value="30" oninput="calcLoan()"></div>
+        `;
+        calcLoan();
+      } else if (tool === 'compound') {
+        form.innerHTML = `
+          <div style="margin-bottom: 8px;"><label class="metric-label">Initial Principal</label><input type="number" id="cpP" value="1000" oninput="calcCompound()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Annual Rate (%)</label><input type="number" id="cpR" value="7" step="0.1" oninput="calcCompound()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Time (Years)</label><input type="number" id="cpT" value="10" oninput="calcCompound()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Compounded Times / Year</label><input type="number" id="cpN" value="12" oninput="calcCompound()"></div>
+        `;
+        calcCompound();
+      } else if (tool === 'investment') {
+        form.innerHTML = `
+          <div style="margin-bottom: 8px;"><label class="metric-label">Initial Investment</label><input type="number" id="invI" value="5000" oninput="calcInvestment()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Final Value</label><input type="number" id="invF" value="7500" oninput="calcInvestment()"></div>
+        `;
+        calcInvestment();
+      } else if (tool === 'tip') {
+        form.innerHTML = `
+          <div style="margin-bottom: 8px;"><label class="metric-label">Bill Amount</label><input type="number" id="tipB" value="50" oninput="calcTip()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Tip (%)</label><input type="number" id="tipP" value="15" oninput="calcTip()"></div>
+          <div style="margin-bottom: 8px;"><label class="metric-label">Split (People)</label><input type="number" id="tipN" value="1" min="1" oninput="calcTip()"></div>
+        `;
+        calcTip();
+      } else {
+        renderConverterUI(tool);
+      }
+    }
+
+    function renderMathGrid(type) {
+      const form = document.getElementById('calcDynamicForm');
+      let buttons = ['C', '(', ')', '/', '7', '8', '9', '*', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.', 'DEL', '='];
+      if (type === 'scientific') {
+        buttons = ['sin', 'cos', 'tan', 'sqrt', 'log', '^', 'pi', 'e', ...buttons];
+      }
+      let html = `<div style="font-family: monospace; font-size: 1.1rem; min-height: 28px; word-break: break-all; text-align: right; border-bottom: 1px solid var(--border-color); margin-bottom: 8px; padding: 4px;" id="mathExpr"></div>`;
+      html += `<div class="calc-btn-grid">`;
+      buttons.forEach(b => {
+        html += `<button type="button" onclick="pressMath('${b}')">${b}</button>`;
+      });
+      html += `</div>`;
+      form.innerHTML = html;
+    }
+
+    function pressMath(val) {
+      if (val === 'C') mathExpr = '';
+      else if (val === 'DEL') mathExpr = mathExpr.slice(0, -1);
+      else if (val === '=') {
+        try {
+          let expr = mathExpr.replace(/pi/g, 'Math.PI').replace(/e/g, 'Math.E')
+                             .replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(')
+                             .replace(/tan\(/g, 'Math.tan(').replace(/sqrt\(/g, 'Math.sqrt(')
+                             .replace(/log\(/g, 'Math.log10(').replace(/\^/g, '**');
+          let res = eval(expr);
+          setCalcResult(Number.isFinite(res) ? res : 'Error');
+          return;
+        } catch {
+          setCalcResult('Error');
+          return;
+        }
+      } else if (['sin', 'cos', 'tan', 'sqrt', 'log'].includes(val)) mathExpr += val + '(';
+      else mathExpr += val;
+
+      document.getElementById('mathExpr').textContent = mathExpr;
+    }
+
+    function calcPercentage() {
+      const p = parseFloat(document.getElementById('percP').value);
+      const v = parseFloat(document.getElementById('percV').value);
+      setCalcResult((!isNaN(p) && !isNaN(v)) ? (p / 100) * v : '--');
+    }
+
+    function calcFractions() {
+      const n1 = parseFloat(document.getElementById('f1n').value), d1 = parseFloat(document.getElementById('f1d').value);
+      const n2 = parseFloat(document.getElementById('f2n').value), d2 = parseFloat(document.getElementById('f2d').value);
+      const op = document.getElementById('fOp').value;
+      if ([n1, d1, n2, d2].some(isNaN) || d1 === 0 || d2 === 0) return setCalcResult('--');
+
+      let resNum, resDen;
+      if (op === '+') { resNum = n1 * d2 + n2 * d1; resDen = d1 * d2; }
+      else if (op === '-') { resNum = n1 * d2 - n2 * d1; resDen = d1 * d2; }
+      else if (op === '*') { resNum = n1 * n2; resDen = d1 * d2; }
+      else { resNum = n1 * d2; resDen = d1 * n2; }
+
+      const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+      const common = gcd(resNum, resDen);
+      setCalcResult(`${resNum / common} / ${resDen / common} (${(resNum / resDen).toFixed(4)})`);
+    }
+
+    function calcLoan() {
+      const p = parseFloat(document.getElementById('loanP').value);
+      const r = parseFloat(document.getElementById('loanR').value) / 100 / 12;
+      const n = parseFloat(document.getElementById('loanY').value) * 12;
+      if (isNaN(p) || isNaN(r) || isNaN(n)) return setCalcResult('--');
+      const m = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      setCalcResult(`${m.toFixed(2)} / month`);
+    }
+
+    function calcCompound() {
+      const p = parseFloat(document.getElementById('cpP').value);
+      const r = parseFloat(document.getElementById('cpR').value) / 100;
+      const t = parseFloat(document.getElementById('cpT').value);
+      const n = parseFloat(document.getElementById('cpN').value);
+      if ([p, r, t, n].some(isNaN)) return setCalcResult('--');
+      const a = p * Math.pow(1 + (r / n), n * t);
+      setCalcResult(a.toFixed(2));
+    }
+
+    function calcInvestment() {
+      const i = parseFloat(document.getElementById('invI').value);
+      const f = parseFloat(document.getElementById('invF').value);
+      if (isNaN(i) || isNaN(f) || i === 0) return setCalcResult('--');
+      const gain = f - i;
+      const roi = (gain / i) * 100;
+      setCalcResult(`${roi.toFixed(2)}% (Profit: ${gain.toFixed(2)})`);
+    }
+
+    function calcTip() {
+      const b = parseFloat(document.getElementById('tipB').value);
+      const p = parseFloat(document.getElementById('tipP').value);
+      const n = parseFloat(document.getElementById('tipN').value) || 1;
+      if (isNaN(b) || isNaN(p)) return setCalcResult('--');
+      const totalTip = b * (p / 100);
+      const total = b + totalTip;
+      setCalcResult(`Total: ${total.toFixed(2)} (${(total / n).toFixed(2)}/person)`);
+    }
+
+    const unitMap = {
+      length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mi: 1609.34, yd: 0.9144, ft: 0.3048, in: 0.0254 },
+      weight: { kg: 1, g: 0.001, mg: 0.000001, lb: 0.453592, oz: 0.0283495 },
+      area: { sqm: 1, sqkm: 1000000, sqft: 0.092903, sqmi: 2589988, acre: 4046.86 },
+      volume: { l: 1, ml: 0.001, cum: 1000, gal: 3.78541, pt: 0.473176 },
+      speed: { mps: 1, kph: 0.277778, mph: 0.44704, knot: 0.514444 },
+      data: { b: 1, kb: 1024, mb: 1048576, gb: 1073741824, tb: 1099511627776 },
+      energy: { j: 1, kj: 1000, cal: 4.184, kcal: 4184, wh: 3600, kwh: 3600000 },
+      pressure: { pa: 1, bar: 100000, psi: 6894.76, atm: 101325 }
+    };
+
+    function renderConverterUI(type) {
+      const form = document.getElementById('calcDynamicForm');
+      if (type === 'temperature') {
+        form.innerHTML = `
+          <div style="margin-bottom: 8px;"><input type="number" id="convVal" value="0" oninput="runTempConv()"></div>
+          <div class="grid-2col">
+            <select id="convFrom" onchange="runTempConv()"><option value="C">Celsius</option><option value="F">Fahrenheit</option><option value="K">Kelvin</option></select>
+            <select id="convTo" onchange="runTempConv()"><option value="F">Fahrenheit</option><option value="C">Celsius</option><option value="K">Kelvin</option></select>
+          </div>
+        `;
+        runTempConv();
+        return;
+      }
+
+      const units = Object.keys(unitMap[type] || {});
+      let opts = units.map(u => `<option value="${u}">${u}</option>`).join('');
+
+      form.innerHTML = `
+        <div style="margin-bottom: 8px;"><input type="number" id="convVal" value="1" oninput="runUnitConv('${type}')"></div>
+        <div class="grid-2col">
+          <select id="convFrom" onchange="runUnitConv('${type}')">${opts}</select>
+          <select id="convTo" onchange="runUnitConv('${type}')">${opts}</select>
+        </div>
+      `;
+      if (units.length > 1) form.querySelector('#convTo').selectedIndex = 1;
+      runUnitConv(type);
+    }
+
+    function runUnitConv(type) {
+      const val = parseFloat(document.getElementById('convVal').value);
+      const from = document.getElementById('convFrom').value;
+      const to = document.getElementById('convTo').value;
+      if (isNaN(val)) return setCalcResult('--');
+
+      const map = unitMap[type];
+      const baseVal = val * map[from];
+      const result = baseVal / map[to];
+      setCalcResult(`${result.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${to}`);
+    }
+
+    function runTempConv() {
+      const val = parseFloat(document.getElementById('convVal').value);
+      const from = document.getElementById('convFrom').value;
+      const to = document.getElementById('convTo').value;
+      if (isNaN(val)) return setCalcResult('--');
+
+      let celsius;
+      if (from === 'C') celsius = val;
+      else if (from === 'F') celsius = (val - 32) * (5 / 9);
+      else celsius = val - 273.15;
+
+      let res;
+      if (to === 'C') res = celsius;
+      else if (to === 'F') res = (celsius * 9 / 5) + 32;
+      else res = celsius + 273.15;
+
+      setCalcResult(`${res.toFixed(2)} °${to}`);
+    }
+
+    // --- REAL-TIME NEWS ---
+    async function fetchNews(category = 'world', btnElement = null) {
+      const newsList = document.getElementById('newsList');
+      newsList.innerHTML = '<div>Fetching latest live news...</div>';
+
+      if (btnElement) {
+        document.querySelectorAll('#newsNav button').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+      }
+
+      try {
+        const res = await fetch(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(category)}&tags=story&hitsPerPage=10`);
+        const data = await res.json();
+        
+        newsList.innerHTML = '';
+
+        if (!data.hits || data.hits.length === 0) {
+          newsList.innerHTML = '<div>No recent articles found.</div>';
+          return;
+        }
+
+        data.hits.forEach(item => {
+          if (!item.title || !item.url) return;
+
+          const newsItem = document.createElement('div');
+          newsItem.className = 'news-item';
+          
+          const timeAgo = Math.floor((new Date() - new Date(item.created_at)) / (1000 * 60 * 60));
+          const timeLabel = timeAgo === 0 ? 'Just now' : `${timeAgo}h ago`;
+
+          newsItem.innerHTML = `
+            <a href="${item.url}" target="_blank" rel="noopener">${item.title}</a>
+            <div class="news-meta">
+              <span>Source: ${item.author || 'News'}</span>
+              <span>${timeLabel}</span>
+            </div>
+          `;
+          newsList.appendChild(newsItem);
+        });
+
+      } catch (err) {
+        newsList.innerHTML = '<div>Failed to load live news.</div>';
+        console.error("News error:", err);
+      }
+    }
+
+    // --- INITIALIZE ALL ---
+    window.onload = () => {
+      getWeather();
+      initCurrency();
+      initClock();
+      initCalculator();
+      fetchNews('world');
+    };
+  </script>
+</body>
+</html>
